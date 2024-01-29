@@ -148,6 +148,10 @@ class LyricEntity(CoordinatorEntity[DataUpdateCoordinator[Lyric]]):
     @property
     def device(self) -> LyricDevice:
         """Get the Lyric Device."""
+        # RH I would think we should be able to switch to using the key all the time.
+        if self._mac_id is None:
+            return self.location.devices_dict[self._key]
+
         return self.location.devices_dict[self._mac_id]
 
 
@@ -157,6 +161,13 @@ class LyricDeviceEntity(LyricEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device information about this Honeywell Lyric instance."""
+        if self._mac_id is None:
+            return DeviceInfo(
+                manufacturer="Honeywell",
+                model=self.device.deviceModel,
+                name=self.device.name,
+            )
+
         return DeviceInfo(
             connections={(dr.CONNECTION_NETWORK_MAC, self._mac_id)},
             manufacturer="Honeywell",

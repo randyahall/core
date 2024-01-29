@@ -129,17 +129,18 @@ async def async_setup_entry(
 
     for location in coordinator.data.locations:
         for device in location.devices:
-            entities.append(
-                LyricClimate(
-                    coordinator,
-                    ClimateEntityDescription(
-                        key=f"{device.macID}_thermostat",
-                        name=device.name,
-                    ),
-                    location,
-                    device,
+            if device.deviceClass != "LeakDetector":
+                entities.append(
+                    LyricClimate(
+                        coordinator,
+                        ClimateEntityDescription(
+                            key=f"{device.macID}_thermostat",
+                            name=device.name,
+                        ),
+                        location,
+                        device,
+                    )
                 )
-            )
 
     async_add_entities(entities, True)
 

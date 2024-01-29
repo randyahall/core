@@ -92,6 +92,23 @@ DEVICE_SENSORS: list[LyricSensorEntityDescription] = [
         suitable_fn=lambda device: device.displayedOutdoorHumidity,
     ),
     LyricSensorEntityDescription(
+        key="waterleak_indoor_temperature",
+        translation_key="waterleak_indoor_temperature",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda device: device.currentSensorReadings.temperature,
+        suitable_fn=lambda device: device.currentSensorReadings.temperature,
+    ),
+    LyricSensorEntityDescription(
+        key="waterleak_indoor_humidity",
+        translation_key="waterleak_indoor_humidity",
+        device_class=SensorDeviceClass.HUMIDITY,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=PERCENTAGE,
+        value_fn=lambda device: device.currentSensorReadings.humidity,
+        suitable_fn=lambda device: device.currentSensorReadings.humidity,
+    ),
+    LyricSensorEntityDescription(
         key="next_period_time",
         translation_key="next_period_time",
         device_class=SensorDeviceClass.TIMESTAMP,
@@ -172,12 +189,20 @@ class LyricSensor(LyricDeviceEntity, SensorEntity):
         device: LyricDevice,
     ) -> None:
         """Initialize."""
-        super().__init__(
-            coordinator,
-            location,
-            device,
-            f"{device.macID}_{description.key}",
-        )
+        if device.deviceClass == "LeakDetector":
+            super().__init__(
+                coordinator,
+                location,
+                device,
+                f"{device.deviceID}_{description.key}",
+            )
+        else:
+            super().__init__(
+                coordinator,
+                location,
+                device,
+                f"{device.macID}_{description.key}",
+            )
         self.entity_description = description
         if description.device_class == SensorDeviceClass.TEMPERATURE:
             if device.units == "Fahrenheit":
